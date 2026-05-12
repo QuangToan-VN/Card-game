@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mission Card Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a14;
+    --surface: #12121f;
+    --card: #1a1a2e;
+    --border: #2a2a4a;
+    --accent1: #ff6b35;
+    --accent2: #ffd700;
+    --accent3: #00d4aa;
+    --accent4: #ff4fcb;
+    --text: #f0f0ff;
+    --muted: #8888aa;
+    --radius: 16px;
+    --team1: #ff6b35;
+    --team2: #ffd700;
+    --team3: #00d4aa;
+    --team4: #ff4fcb;
+    --team5: #7c6fff;
+    --team6: #ff6b6b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* BG pattern */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,107,53,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(0,212,170,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(255,215,0,0.04) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+/* ===== HEADER ===== */
+header {
+position: sticky; top: 0; z-index: 100;
+background: rgba(10,10,20,0.9);
+backdrop-filter: blur(20px);
+border-bottom: 1px solid var(–border);
+padding: 12px 24px;
+display: flex; align-items: center; justify-content: space-between;
+flex-wrap: wrap; gap: 8px;
+}
+.logo {
+font-family: 'Dela Gothic One', cursive;
+font-size: clamp(16px, 3vw, 22px);
+background: linear-gradient(90deg, var(–accent1), var(–accent2), var(–accent3));
+-webkit-background-clip: text; -webkit-text-fill-color: transparent;
+letter-spacing: 1px;
+}
+.header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lang-btn {
+background: var(–card); border: 1px solid var(–border);
+color: var(–muted); padding: 6px 12px; border-radius: 20px;
+cursor: pointer; font-size: 12px; transition: all 0.2s;
+font-family: inherit;
+}
+.lang-btn:hover, .lang-btn.active {
+background: var(–accent1); border-color: var(–accent1);
+color: white;
+}
+.nav-btn {
+background: transparent; border: 1px solid var(–border);
+color: var(–text); padding: 8px 16px; border-radius: 20px;
+cursor: pointer; font-size: 13px; transition: all 0.2s;
+font-family: inherit;
+}
+.nav-btn:hover { border-color: var(–accent1); color: var(–accent1); }
+.nav-btn.active-nav {
+background: var(–accent1); border-color: var(–accent1); color: white;
+}
+
+/* ===== PAGES ===== */
+.page { display: none; position: relative; z-index: 1; }
+.page.active { display: block; }
+.container { max-width: 900px; margin: 0 auto; padding: 32px 20px; }
+
+/* ===== HOME ===== */
+.hero {
+text-align: center; padding: 40px 20px 20px;
+}
+.hero h1 {
+font-family: 'Dela Gothic One', cursive;
+font-size: clamp(32px, 7vw, 64px);
+line-height: 1.1;
+background: linear-gradient(135deg, var(–accent1) 0%, var(–accent2) 50%, var(–accent3) 100%);
+-webkit-background-clip: text; -webkit-text-fill-color: transparent;
+margin-bottom: 12px;
+}
+.hero p { color: var(–muted); font-size: 15px; max-width: 500px; margin: 0 auto 32px; line-height: 1.7; }
+.hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+background: linear-gradient(135deg, var(–accent1), var(–accent4));
+color: white; border: none; padding: 14px 32px; border-radius: 40px;
+font-size: 15px; font-weight: 700; cursor: pointer;
+font-family: inherit; transition: all 0.2s; letter-spacing: 0.5px;
+box-shadow: 0 4px 20px rgba(255,107,53,0.4);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,53,0.5); }
+.btn-secondary {
+background: var(–card); color: var(–text);
+border: 1px solid var(–border); padding: 14px 32px; border-radius: 40px;
+font-size: 15px; cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(–accent3); color: var(–accent3); }
+
+/* ===== SPINNER PAGE ===== */
+.spinner-section { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.name-input-area {
+background: var(–card); border: 1px solid var(–border);
+border-radius: var(–radius); padding: 20px; width: 100%; max-width: 480px;
+}
+.name-input-area h3 { font-size: 14px; color: var(–muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.name-input-row { display: flex; gap: 8px; }
+.name-input {
+flex: 1; background: var(–bg); border: 1px solid var(–border);
+color: var(–text); padding: 10px 14px; border-radius: 10px;
+font-size: 14px; font-family: inherit; outline: none;
+transition: border-color 0.2s;
+}
+.name-input:focus { border-color: var(–accent1); }
+.btn-add {
+background: var(–accent1); color: white; border: none;
+padding: 10px 18px; border-radius: 10px; cursor: pointer;
+font-size: 14px; font-family: inherit; font-weight: 700;
+}
+.players-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.player-tag {
+background: var(–bg); border: 1px solid var(–border);
+padding: 4px 10px; border-radius: 20px; font-size: 12px;
+display: flex; align-items: center; gap: 6px;
+}
+.player-tag .remove { cursor: pointer; color: var(–muted); font-size: 14px; }
+.player-tag .remove:hover { color: var(–accent4); }
+
+/* WHEEL */
+.wheel-wrap { position: relative; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.wheel-pointer {
+width: 0; height: 0;
+border-left: 14px solid transparent;
+border-right: 14px solid transparent;
+border-top: 28px solid var(–accent2);
+filter: drop-shadow(0 0 8px var(–accent2));
+z-index: 10;
+}
+canvas#wheel {
+border-radius: 50%;
+box-shadow: 0 0 0 4px var(–border), 0 0 40px rgba(255,107,53,0.3);
+}
+.spin-btn {
+background: linear-gradient(135deg, var(–accent2), var(–accent1));
+color: #0a0a14; border: none; padding: 14px 40px; border-radius: 40px;
+font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Dela Gothic One', cursive;
+transition: all 0.2s; letter-spacing: 1px;
+box-shadow: 0 4px 20px rgba(255,215,0,0.4);
+}
+.spin-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,215,0,0.5); }
+.spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* TEAMS DISPLAY */
+.teams-grid {
+display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+gap: 12px; width: 100%; max-width: 700px; margin-top: 8px;
+}
+.team-card {
+background: var(–card); border-radius: var(–radius);
+padding: 16px; border: 1px solid var(–border);
+transition: border-color 0.3s;
+}
+.team-card.highlight { animation: pulse 0.6s ease; }
+@keyframes pulse {
+0% { transform: scale(1); }
+50% { transform: scale(1.04); }
+100% { transform: scale(1); }
+}
+.team-name {
+font-family: 'Dela Gothic One', cursive;
+font-size: 14px; margin-bottom: 8px;
+display: flex; align-items: center; gap: 6px;
+}
+.team-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.team-members { display: flex; flex-direction: column; gap: 4px; }
+.member-chip {
+background: var(–bg); padding: 5px 10px; border-radius: 8px;
+font-size: 12px; color: var(–text);
+}
+.result-banner {
+background: linear-gradient(135deg, var(–card), var(–surface));
+border: 1px solid var(–accent2); border-radius: var(–radius);
+padding: 20px 32px; text-align: center; max-width: 400px; width: 100%;
+}
+.result-banner h2 { font-family: 'Dela Gothic One', cursive; font-size: 24px; }
+.result-team { font-size: 14px; color: var(–muted); margin-top: 4px; }
+
+/* ===== MISSIONS PAGE ===== */
+.missions-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.team-filter { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-btn {
+padding: 7px 16px; border-radius: 20px; border: 1px solid var(–border);
+background: var(–card); color: var(–muted); cursor: pointer;
+font-size: 12px; font-family: inherit; transition: all 0.2s;
+}
+.filter-btn.active, .filter-btn:hover { color: white; }
+.missions-list { display: flex; flex-direction: column; gap: 12px; }
+.mission-card {
+background: var(–card); border: 1px solid var(–border);
+border-radius: var(–radius); padding: 20px;
+transition: border-color 0.2s; display: flex; gap: 16px; align-items: flex-start;
+}
+.mission-card.done { opacity: 0.7; border-color: var(–accent3); }
+.mission-check {
+width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(–border);
+cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+transition: all 0.2s; margin-top: 2px;
+}
+.mission-check.checked { background: var(–accent3); border-color: var(–accent3); }
+.mission-check.checked::after { content: '✓'; font-size: 14px; color: var(–bg); font-weight: 700; }
+.mission-body { flex: 1; }
+.mission-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.mission-pts { font-size: 12px; color: var(–accent2); margin-bottom: 8px; }
+.mission-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.upload-btn {
+background: var(–bg); border: 1px dashed var(–border);
+color: var(–muted); padding: 7px 14px; border-radius: 8px;
+cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.2s;
+}
+.upload-btn:hover { border-color: var(–accent3); color: var(–accent3); }
+.upload-input { display: none; }
+.photo-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.photo-thumb {
+width: 60px; height: 60px; border-radius: 8px; object-fit: cover;
+border: 1px solid var(–border); cursor: pointer;
+}
+
+/* ===== SCOREBOARD ===== */
+.score-podium { display: flex; align-items: flex-end; justify-content: center; gap: 12px; margin-bottom: 32px; }
+.podium-item {
+display: flex; flex-direction: column; align-items: center; gap: 8px;
+flex: 1; max-width: 160px;
+}
+.podium-block {
+width: 100%; border-radius: 12px 12px 0 0;
+display: flex; align-items: flex-start; justify-content: center;
+padding-top: 12px; font-family: 'Dela Gothic One', cursive;
+font-size: 24px; color: var(–bg);
+}
+.podium-name { font-size: 13px; font-weight: 700; text-align: center; }
+.podium-score { font-size: 20px; font-family: 'Dela Gothic One', cursive; }
+.scores-table { width: 100%; border-collapse: collapse; }
+.scores-table th {
+text-align: left; padding: 10px 16px;
+color: var(–muted); font-size: 12px; text-transform: uppercase;
+letter-spacing: 1px; border-bottom: 1px solid var(–border);
+}
+.scores-table td {
+padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05);
+font-size: 14px;
+}
+.rank-badge {
+width: 28px; height: 28px; border-radius: 50%; display: inline-flex;
+align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+}
+.progress-bar-wrap { background: var(–bg); border-radius: 20px; height: 6px; flex: 1; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
+
+/* ===== ADMIN ===== */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media(max-width: 600px) { .admin-grid { grid-template-columns: 1fr; } }
+.admin-card {
+background: var(–card); border: 1px solid var(–border);
+border-radius: var(–radius); padding: 20px;
+}
+.admin-card h3 { font-size: 14px; color: var(–muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.admin-mission-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+.admin-mission-item {
+display: flex; justify-content: space-between; align-items: center;
+background: var(–bg); padding: 10px 14px; border-radius: 10px;
+font-size: 13px;
+}
+.admin-mission-item .pts-edit {
+background: transparent; border: 1px solid var(–border);
+color: var(–accent2); width: 50px; text-align: center;
+border-radius: 6px; padding: 3px 6px; font-family: inherit;
+}
+.new-mission-form { display: flex; flex-direction: column; gap: 8px; }
+.form-input {
+background: var(–bg); border: 1px solid var(–border);
+color: var(–text); padding: 10px 14px; border-radius: 10px;
+font-size: 13px; font-family: inherit; outline: none;
+transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(–accent1); }
+.btn-sm {
+background: var(–accent1); color: white; border: none;
+padding: 8px 18px; border-radius: 8px; cursor: pointer;
+font-size: 13px; font-family: inherit; font-weight: 700;
+}
+.timer-display {
+font-family: 'Dela Gothic One', cursive;
+font-size: 48px; text-align: center;
+background: linear-gradient(135deg, var(–accent1), var(–accent2));
+-webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.timer-controls { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+.submission-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; }
+.submission-item {
+background: var(–bg); border-radius: 10px; padding: 12px;
+font-size: 13px; border-left: 3px solid var(–accent3);
+}
+.sub-photos { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+/* MODAL */
+.modal-overlay {
+position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+display: flex; align-items: center; justify-content: center;
+z-index: 1000; padding: 20px;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+background: var(–card); border: 1px solid var(–border);
+border-radius: var(–radius); padding: 32px; max-width: 480px; width: 100%;
+text-align: center;
+}
+.modal h2 { font-family: 'Dela Gothic One', cursive; font-size: 28px; margin-bottom: 8px; }
+.modal p { color: var(–muted); margin-bottom: 24px; }
+.modal img { max-width: 100%; border-radius: 12px; max-height: 300px; object-fit: contain; }
+.modal-close {
+position: absolute; top: 16px; right: 16px;
+background: var(–border); border: none; color: var(–text);
+width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+font-size: 16px; display: flex; align-items: center; justify-content: center;
+}
+
+/* TOAST */
+#toast {
+position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+background: var(–accent3); color: var(–bg);
+padding: 12px 24px; border-radius: 40px; font-weight: 700; font-size: 14px;
+z-index: 9999; opacity: 0; transition: opacity 0.3s;
+pointer-events: none;
+}
+#toast.show { opacity: 1; }
+
+/* CONFETTI */
+.confetti-piece {
+position: fixed; width: 10px; height: 10px;
+border-radius: 2px; pointer-events: none; z-index: 9998;
+animation: confetti-fall 3s ease forwards;
+}
+@keyframes confetti-fall {
+0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* TIMER RING */
+.timer-ring { position: relative; display: inline-block; margin: 0 auto; }
+svg.ring { transform: rotate(-90deg); }
+
+/* Utilities */
+.section-title {
+font-family: 'Dela Gothic One', cursive;
+font-size: clamp(20px, 4vw, 28px);
+margin-bottom: 8px;
+}
+.section-sub { color: var(–muted); font-size: 13px; margin-bottom: 24px; }
+.divider { border: none; border-top: 1px solid var(–border); margin: 24px 0; }
+.text-center { text-align: center; }
+.text-accent1 { color: var(–accent1); }
+.text-accent2 { color: var(–accent2); }
+.text-accent3 { color: var(–accent3); }
+
+/* Spinner animation */
+@keyframes spin-anim {
+to { transform: rotate(360deg); }
+}
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<header>
+  <div class="logo">🎯 MISSION CARD</div>
+  <div class="header-right">
+    <div style="display:flex;gap:4px;">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('zh')">中文</button>
+      <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+      <button class="lang-btn" onclick="setLang('vi')">VI</button>
+    </div>
+    <button class="nav-btn active-nav" onclick="showPage('home')" id="nav-home">🏠 Home</button>
+    <button class="nav-btn" onclick="showPage('spinner')" id="nav-spinner">🎡 Teams</button>
+    <button class="nav-btn" onclick="showPage('missions')" id="nav-missions">📋 Missions</button>
+    <button class="nav-btn" onclick="showPage('score')" id="nav-score">🏆 Score</button>
+    <button class="nav-btn" onclick="showPage('admin')" id="nav-admin">⚙️ Admin</button>
+  </div>
+</header>
+
+<!-- TOAST -->
+
+<div id="toast"></div>
+
+<!-- MODAL -->
+
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- ===== HOME PAGE ===== -->
+
+<div class="page active" id="page-home">
+  <div class="container">
+    <div class="hero">
+      <h1 id="h-title">MISSION CARD GAME</h1>
+      <p id="h-sub">Cross borders, break the ice, make new friends! Complete missions with your team and earn points.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('spinner')" id="h-btn1">🎡 Join a Team</button>
+        <button class="btn-secondary" onclick="showPage('missions')" id="h-btn2">📋 View Missions</button>
+      </div>
+    </div>
+    <hr class="divider"/>
+    <!-- How to play -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:8px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+        <div style="font-size:32px;margin-bottom:8px;">🎡</div>
+        <div style="font-weight:700;margin-bottom:4px;" id="hp1-title">Spin the Wheel</div>
+        <div style="font-size:13px;color:var(--muted);" id="hp1-desc">Spin to get randomly assigned to a team of 5–6 people.</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+        <div style="font-size:32px;margin-bottom:8px;">📸</div>
+        <div style="font-weight:700;margin-bottom:4px;" id="hp2-title">Complete Missions</div>
+        <div style="font-size:13px;color:var(--muted);" id="hp2-desc">Talk to others, learn new words, and upload photos as proof!</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+        <div style="font-size:32px;margin-bottom:8px;">🏆</div>
+        <div style="font-weight:700;margin-bottom:4px;" id="hp3-title">Win Together</div>
+        <div style="font-size:13px;color:var(--muted);" id="hp3-desc">The team with the most missions wins — but everyone makes new friends!</div>
+      </div>
+    </div>
+    <!-- Rules -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:20px;">
+      <div class="section-title" style="font-size:18px;margin-bottom:12px;" id="rules-title">📜 Rules</div>
+      <ul style="color:var(--muted);font-size:13px;line-height:2;padding-left:16px;" id="rules-list">
+        <li>Time limit: 20 minutes</li>
+        <li>Complete as many missions as possible</li>
+        <li>Talk to NEW people, not just your group</li>
+        <li>Take photos / write names as proof</li>
+        <li>Return to meeting point when time is up</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SPINNER PAGE ===== -->
+
+<div class="page" id="page-spinner">
+  <div class="container">
+    <div class="section-title" id="sp-title">🎡 Team Spinner</div>
+    <div class="section-sub" id="sp-sub">Enter your name and spin to join a team!</div>
+
+<div class="spinner-section">
+  <!-- Name input -->
+  <div class="name-input-area">
+    <h3 id="sp-namelab">Your Name</h3>
+    <div class="name-input-row">
+      <input class="name-input" id="nameInput" type="text" placeholder="Enter your name..." onkeydown="if(event.key==='Enter')addPlayer()"/>
+      <button class="btn-add" onclick="addPlayer()" id="sp-addbtn">Add</button>
+    </div>
+    <div class="players-list" id="playersList"></div>
+  </div>
+
+  <!-- Wheel -->
+  <div class="wheel-wrap">
+    <div class="wheel-pointer"></div>
+    <canvas id="wheel" width="320" height="320"></canvas>
+    <button class="spin-btn" id="spinBtn" onclick="spinWheel()" id="sp-spinbtn">SPIN!</button>
+  </div>
+
+  <!-- Result -->
+  <div class="result-banner" id="spinResult" style="display:none;">
+    <div style="font-size:40px;margin-bottom:8px;">🎉</div>
+    <h2 id="resultName"></h2>
+    <div class="result-team" id="resultTeam"></div>
+  </div>
+
+  <!-- Teams -->
+  <div style="width:100%;max-width:700px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-weight:700;" id="sp-teamlab">Teams</div>
+      <button onclick="resetTeams()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit;" id="sp-resetbtn">Reset</button>
+    </div>
+    <div class="teams-grid" id="teamsGrid"></div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<!-- ===== MISSIONS PAGE ===== -->
+
+<div class="page" id="page-missions">
+  <div class="container">
+    <div class="missions-header">
+      <div>
+        <div class="section-title" id="ms-title">📋 Missions</div>
+        <div class="section-sub" id="ms-sub">Complete missions to earn points for your team!</div>
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--muted);" id="ms-selteam">Select your team:</div>
+        <div class="team-filter" id="teamFilter" style="margin-top:6px;"></div>
+      </div>
+    </div>
+    <div class="missions-list" id="missionsList"></div>
+  </div>
+</div>
+
+<!-- ===== SCOREBOARD PAGE ===== -->
+
+<div class="page" id="page-score">
+  <div class="container">
+    <div class="section-title text-center" id="sc-title">🏆 Scoreboard</div>
+    <div class="section-sub text-center" id="sc-sub">Live team rankings</div>
+    <div class="score-podium" id="scorePodium"></div>
+    <table class="scores-table" id="scoresTable">
+      <thead>
+        <tr>
+          <th id="sc-rank">Rank</th>
+          <th id="sc-team">Team</th>
+          <th id="sc-missions">Missions</th>
+          <th id="sc-points">Points</th>
+          <th id="sc-progress">Progress</th>
+        </tr>
+      </thead>
+      <tbody id="scoresBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== ADMIN PAGE ===== -->
+
+<div class="page" id="page-admin">
+  <div class="container">
+    <div class="section-title" id="ad-title">⚙️ Admin Panel</div>
+    <div class="section-sub" id="ad-sub">Manage missions, timer, and view submissions</div>
+    <div class="admin-grid">
+      <!-- Timer -->
+      <div class="admin-card">
+        <h3 id="ad-timer">⏱ Game Timer</h3>
+        <div class="timer-display" id="timerDisplay">20:00</div>
+        <div class="timer-controls">
+          <button class="btn-sm" onclick="startTimer()" id="ad-start">Start</button>
+          <button class="btn-sm" onclick="pauseTimer()" style="background:var(--muted);" id="ad-pause">Pause</button>
+          <button class="btn-sm" onclick="resetTimer()" style="background:var(--card);border:1px solid var(--border);color:var(--text);" id="ad-reset">Reset</button>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+          <label style="font-size:12px;color:var(--muted);" id="ad-setmin">Minutes:</label>
+          <input type="number" id="timerInput" value="20" min="1" max="99" class="form-input" style="width:70px;"/>
+          <button class="btn-sm" onclick="setTimerDuration()" id="ad-setbtn">Set</button>
+        </div>
+      </div>
+      <!-- Missions -->
+      <div class="admin-card">
+        <h3 id="ad-mgr">📋 Mission Manager</h3>
+        <div class="admin-mission-list" id="adminMissionList"></div>
+        <hr class="divider"/>
+        <div class="new-mission-form">
+          <input class="form-input" id="newMissionText" placeholder="Mission description..." />
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" id="newMissionPts" type="number" value="10" min="1" placeholder="Points" style="width:80px;"/>
+            <button class="btn-sm" onclick="addMission()" id="ad-addmission">+ Add Mission</button>
+          </div>
+        </div>
+      </div>
+      <!-- Submissions -->
+      <div class="admin-card" style="grid-column:1/-1;">
+        <h3 id="ad-subs">📸 Submissions</h3>
+        <div class="submission-list" id="submissionList">
+          <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;" id="ad-nosub">No submissions yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+const TEAM_COLORS = ['#ff6b35','#ffd700','#00d4aa','#ff4fcb','#7c6fff','#ff6b6b'];
+const TEAM_NAMES_TEMPLATE = ['🦁 Lions','🐉 Dragons','🦅 Eagles','🌊 Waves','⚡ Thunder','🌸 Sakura'];
+
+let state = {
+  lang: 'en',
+  players: [],
+  teams: [
+    {name:'🦁 Lions', color:'#ff6b35', members:[]},
+    {name:'🐉 Dragons', color:'#ffd700', members:[]},
+    {name:'🦅 Eagles', color:'#00d4aa', members:[]},
+    {name:'🌊 Waves', color:'#ff4fcb', members:[]},
+    {name:'⚡ Thunder', color:'#7c6fff', members:[]},
+    {name:'🌸 Sakura', color:'#ff6b6b', members:[]},
+  ],
+  missions: [
+    {id:1, text:{en:"Talk to someone from a different country", ja:"違う国の人に話しかける", zh:"和来自不同国家的人交谈", ko:"다른 나라 사람과 대화하기", vi:"Nói chuyện với người từ quốc gia khác"}, pts:10, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:2, text:{en:"Learn 'hello' in another language", ja:"他の言語で「こんにちは」を教えてもらう", zh:"用另一种语言学说'你好'", ko:"다른 언어로 '안녕하세요' 배우기", vi:"Học 'xin chào' trong ngôn ngữ khác"}, pts:10, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:3, text:{en:"Find someone with the same hobby", ja:"同じ趣味の人を見つける", zh:"找到有相同爱好的人", ko:"같은 취미를 가진 사람 찾기", vi:"Tìm người có cùng sở thích"}, pts:15, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:4, text:{en:"Ask a Japanese student for a recommended food", ja:"日本人学生におすすめの日本料理を聞く", zh:"向日本学生询问推荐的日本料理", ko:"일본 학생에게 추천 음식 묻기", vi:"Hỏi học sinh Nhật Bản về đồ ăn được khuyến nghị"}, pts:15, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:5, text:{en:"Take a photo with a new friend!", ja:"新しい友達と写真を撮る", zh:"和新朋友合影", ko:"새 친구와 사진 찍기", vi:"Chụp ảnh cùng người bạn mới!"}, pts:20, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:6, text:{en:"Teach someone a word from your language", ja:"自分の国の言葉を1つ教える", zh:"教别人你母语中的一个词", ko:"자국어 단어 한 개 가르쳐 주기", vi:"Dạy ai đó một từ từ ngôn ngữ của bạn"}, pts:10, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:7, text:{en:"Ask for a recommended spot in Japan", ja:"日本のおすすめスポットを聞く", zh:"询问日本推荐景点", ko:"일본 추천 명소 물어보기", vi:"Hỏi địa điểm được khuyến nghị ở Nhật Bản"}, pts:10, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:8, text:{en:"Create a team name and team pose!", ja:"チーム名とチームポーズを作る", zh:"创建队名和队伍姿势！", ko:"팀 이름과 팀 포즈 만들기!", vi:"Tạo tên đội và tư thế đội!"}, pts:25, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:9, text:{en:"Count to 10 in a language you just learned", ja:"覚えた言語で1〜10を数える", zh:"用刚学的语言数1到10", ko:"배운 언어로 1부터 10까지 세기", vi:"Đếm từ 1 đến 10 bằng ngôn ngữ vừa học"}, pts:15, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+    {id:10, text:{en:"Exchange contact info with someone new", ja:"新しい人と連絡先を交換する", zh:"与新认识的人交换联系方式", ko:"새로운 사람과 연락처 교환하기", vi:"Trao đổi thông tin liên hệ với người mới"}, pts:20, done:[false,false,false,false,false,false], photos:[[], [], [], [], [], []]},
+  ],
+  selectedTeamIndex: 0,
+  submissions: [],
+  timer: {seconds: 20*60, running: false, interval: null},
+};
+
+// ===== TRANSLATIONS =====
+const T = {
+  en: {
+    title: "MISSION CARD GAME",
+    sub: "Cross borders, break the ice, make new friends! Complete missions with your team and earn points.",
+    btn1: "🎡 Join a Team", btn2: "📋 View Missions",
+    hp1t: "Spin the Wheel", hp1d: "Spin to get randomly assigned to a team of 5–6 people.",
+    hp2t: "Complete Missions", hp2d: "Talk to others, learn new words, and upload photos as proof!",
+    hp3t: "Win Together", hp3d: "The team with the most missions wins — but everyone makes new friends!",
+    ruleTitle: "📜 Rules",
+    rules: ["Time limit: 20 minutes","Complete as many missions as possible","Talk to NEW people, not just your group","Take photos / write names as proof","Return to meeting point when time is up"],
+    spTitle:"🎡 Team Spinner", spSub:"Enter your name and spin to join a team!",
+    spNamelab:"Your Name", spAddbtn:"Add", spSpinbtn:"SPIN!", spTeamlab:"Teams", spResetbtn:"Reset",
+    msTitle:"📋 Missions", msSub:"Complete missions to earn points for your team!", msSelteam:"Select your team:",
+    scTitle:"🏆 Scoreboard", scSub:"Live team rankings",
+    scRank:"Rank", scTeam:"Team", scMissions:"Missions", scPoints:"Points", scProgress:"Progress",
+    adTitle:"⚙️ Admin Panel", adSub:"Manage missions, timer, and view submissions",
+    adTimer:"⏱ Game Timer", adStart:"Start", adPause:"Pause", adReset:"Reset",
+    adSetmin:"Minutes:", adSetbtn:"Set",
+    adMgr:"📋 Mission Manager", adAddmission:"+ Add Mission",
+    adSubs:"📸 Submissions", adNosub:"No submissions yet.",
+    pts:"pts", uploadPhoto:"📷 Upload Photo", markDone:"Mark Done",
+    teamJoined:"joined", resultMsg:"You're in",
+    noSub:"No submissions yet."
+  },
+  ja: {
+    title: "ミッションカードゲーム",
+    sub: "国籍や言語をこえて、楽しく友達を作ろう！チームでミッションをクリアしてポイントを獲得しよう！",
+    btn1: "🎡 チームに参加", btn2: "📋 ミッション一覧",
+    hp1t: "ルーレット", hp1d: "ルーレットを回して5〜6人のチームにランダムに配属されます。",
+    hp2t: "ミッション達成", hp2d: "他の人と話して、新しい言葉を学んで、写真を撮ろう！",
+    hp3t: "一緒に勝とう", hp3d: "ミッションを一番多く達成したチームが勝ちです！でも全員が新しい友達を作れる！",
+    ruleTitle: "📜 ルール",
+    rules: ["制限時間：20分","できるだけ多くのミッションを達成してください","グループ内だけでなく新しい人に話しかけましょう","名前や写真で記録を取ってください","時間になったら集合地点に戻ってください"],
+    spTitle:"🎡 チーム分け", spSub:"名前を入力してルーレットを回そう！",
+    spNamelab:"あなたの名前", spAddbtn:"追加", spSpinbtn:"スピン！", spTeamlab:"チーム", spResetbtn:"リセット",
+    msTitle:"📋 ミッション", msSub:"ミッションを達成してチームのポイントを稼ごう！", msSelteam:"チームを選択：",
+    scTitle:"🏆 スコアボード", scSub:"チームランキング",
+    scRank:"順位", scTeam:"チーム", scMissions:"ミッション数", scPoints:"ポイント", scProgress:"進捗",
+    adTitle:"⚙️ 管理パネル", adSub:"ミッション・タイマー・提出物の管理",
+    adTimer:"⏱ タイマー", adStart:"スタート", adPause:"一時停止", adReset:"リセット",
+    adSetmin:"分：", adSetbtn:"設定",
+    adMgr:"📋 ミッション管理", adAddmission:"＋ ミッション追加",
+    adSubs:"📸 提出物", adNosub:"まだ提出がありません。",
+    pts:"点", uploadPhoto:"📷 写真をアップロード", markDone:"達成！",
+    teamJoined:"に参加しました", resultMsg:"チーム：",
+    noSub:"まだ提出がありません。"
+  },
+  zh: {
+    title: "任务卡片游戏",
+    sub: "跨越国籍与语言，快乐交朋友！与团队完成任务，赢取积分！",
+    btn1: "🎡 加入队伍", btn2: "📋 查看任务",
+    hp1t: "转轮盘", hp1d: "转动轮盘随机分配到5-6人的队伍。",
+    hp2t: "完成任务", hp2d: "与他人交流，学习新词汇，上传照片作为证明！",
+    hp3t: "共同获胜", hp3d: "完成最多任务的队伍获胜——但大家都能交到新朋友！",
+    ruleTitle: "📜 规则",
+    rules: ["时间限制：20分钟","尽可能完成更多任务","与新认识的人交流，不只是组内成员","拍照或记录姓名作为证明","时间到后返回集合地点"],
+    spTitle:"🎡 队伍分配", spSub:"输入你的名字并转动轮盘加入队伍！",
+    spNamelab:"你的名字", spAddbtn:"添加", spSpinbtn:"转！", spTeamlab:"队伍", spResetbtn:"重置",
+    msTitle:"📋 任务", msSub:"完成任务为你的队伍赢取积分！", msSelteam:"选择你的队伍：",
+    scTitle:"🏆 积分榜", scSub:"实时队伍排名",
+    scRank:"排名", scTeam:"队伍", scMissions:"任务数", scPoints:"积分", scProgress:"进度",
+    adTitle:"⚙️ 管理面板", adSub:"管理任务、计时器和提交内容",
+    adTimer:"⏱ 游戏计时器", adStart:"开始", adPause:"暂停", adReset:"重置",
+    adSetmin:"分钟：", adSetbtn:"设置",
+    adMgr:"📋 任务管理", adAddmission:"+ 添加任务",
+    adSubs:"📸 提交内容", adNosub:"暂无提交。",
+    pts:"分", uploadPhoto:"📷 上传照片", markDone:"完成！",
+    teamJoined:"加入了", resultMsg:"你在",
+    noSub:"暂无提交。"
+  },
+  ko: {
+    title: "미션 카드 게임",
+    sub: "국적과 언어를 넘어 즐겁게 친구를 만들어요! 팀과 함께 미션을 완료하고 점수를 획득하세요!",
+    btn1: "🎡 팀 참여", btn2: "📋 미션 보기",
+    hp1t: "룰렛 돌리기", hp1d: "룰렛을 돌려 5~6명의 팀에 무작위로 배정됩니다.",
+    hp2t: "미션 완료", hp2d: "다른 사람과 대화하고, 새 단어를 배우고, 사진을 찍으세요!",
+    hp3t: "함께 승리", hp3d: "미션을 가장 많이 완료한 팀이 이깁니다 — 하지만 모두가 새 친구를 사귀어요!",
+    ruleTitle: "📜 규칙",
+    rules: ["제한 시간: 20분","가능한 한 많��� 미션 완료","그룹 내부뿐만 아니라 새로운 사람에게 말 걸기","이름이나 사진으로 기록하기","시간이 되면 집합지점에 돌아가기"],
+    spTitle:"🎡 팀 배정", spSub:"이름을 입력하고 룰렛을 돌려 팀에 참여하세요!",
+    spNamelab:"당신의 이름", spAddbtn:"추가", spSpinbtn:"돌리기!", spTeamlab:"팀", spResetbtn:"초기화",
+    msTitle:"📋 미션", msSub:"미션을 완료하여 팀의 점수를 획득하세요!", msSelteam:"팀 선택:",
+    scTitle:"🏆 점수판", scSub:"실시간 팀 순위",
+    scRank:"순위", scTeam:"팀", scMissions:"미션", scPoints:"점수", scProgress:"진행도",
+    adTitle:"⚙️ 관리자 패널", adSub:"미션, 타이머, 제출물 관리",
+    adTimer:"⏱ 게임 타이머", adStart:"시작", adPause:"일시정지", adReset:"초기화",
+    adSetmin:"분:", adSetbtn:"설정",
+    adMgr:"📋 미션 관리", adAddmission:"+ 미션 추가",
+    adSubs:"📸 제출물", adNosub:"제출물이 없습니다.",
+    pts:"점", uploadPhoto:"📷 사진 업로드", markDone:"완료!",
+    teamJoined:"팀에 참여���습니다", resultMsg:"소속:",
+    noSub:"제출물이 없습니다."
+  },
+  vi: {
+    title: "TRÒ CHƠI THẺ NHIỆM VỤ",
+    sub: "Vượt qua rào cản ngôn ngữ, kết bạn vui vẻ! Hoàn thành nhiệm vụ cùng đội và kiếm điểm!",
+    btn1: "🎡 Tham gia đội", btn2: "📋 Xem nhiệm vụ",
+    hp1t: "Quay vòng quay", hp1d: "Quay để được phân công ngẫu nhiên vào nhóm 5–6 người.",
+    hp2t: "Hoàn thành nhiệm vụ", hp2d: "Nói chuyện với người khác, học từ mới và chụp ảnh làm bằng chứng!",
+    hp3t: "Cùng chiến thắng", hp3d: "Đội hoàn thành nhiều nhiệm vụ nhất sẽ thắng — nhưng ai cũng có bạn mới!",
+    ruleTitle: "📜 Luật chơi",
+    rules: ["Giới hạn thời gian: 20 phút","Hoàn thành càng nhiều nhiệm vụ càng tốt","Nói chuyện với NGƯỜI MỚI, không chỉ trong nhóm","Chụp ảnh / ghi tên làm bằng chứng","Thời gian đến sau quay lại điểm tập trung"],
+    spTitle:"🎡 Vòng quay đội", spSub:"Nhập tên và quay để vào đội!",
+    spNamelab:"Tên của bạn", spAddbtn:"Thêm", spSpinbtn:"QUAY!", spTeamlab:"Đội", spResetbtn:"Đặt lại",
+    msTitle:"📋 Nhiệm vụ", msSub:"Hoàn thành nhiệm vụ để kiếm điểm cho đội!", msSelteam:"Chọn đội của bạn:",
+    scTitle:"🏆 Bảng điểm", scSub:"Xếp hạng đội theo thời gian thực",
+    scRank:"Hạng", scTeam:"Đội", scMissions:"Nhiệm vụ", scPoints:"Điểm", scProgress:"Tiến độ",
+    adTitle:"⚙️ Trang quản trị", adSub:"Quản lý nhiệm vụ, đồng hồ và bài nộp",
+    adTimer:"⏱ Đồng hồ", adStart:"Bắt đầu", adPause:"Tạm dừng", adReset:"Đặt lại",
+    adSetmin:"Phút:", adSetbtn:"Đặt",
+    adMgr:"📋 Quản lý nhiệm vụ", adAddmission:"+ Thêm nhiệm vụ",
+    adSubs:"📸 Bài nộp", adNosub:"Chưa có bài nộp.",
+    pts:"điểm", uploadPhoto:"📷 Tải ảnh lên", markDone:"Xong!",
+    teamJoined:"đã vào đội", resultMsg:"Đội của bạn:",
+    noSub:"Chưa có bài nộp."
+  }
+};
+
+// ===== LANG =====
+function setLang(lang) {
+  state.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  applyTranslations();
+  renderAll();
+}
+
+function t(key) {
+  return T[state.lang][key] || T['en'][key] || key;
+}
+
+function applyTranslations() {
+  const l = state.lang;
+  const setText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  setText('h-title', t('title'));
+  setText('h-sub', t('sub'));
+  setText('h-btn1', t('btn1'));
+  setText('h-btn2', t('btn2'));
+  setText('hp1-title', t('hp1t')); setText('hp1-desc', t('hp1d'));
+  setText('hp2-title', t('hp2t')); setText('hp2-desc', t('hp2d'));
+  setText('hp3-title', t('hp3t')); setText('hp3-desc', t('hp3d'));
+  setText('rules-title', t('ruleTitle'));
+  const rl = document.getElementById('rules-list');
+  if(rl) rl.innerHTML = t('rules').map(r=>`<li>${r}</li>`).join('');
+  setText('sp-title', t('spTitle')); setText('sp-sub', t('spSub'));
+  setText('sp-namelab', t('spNamelab')); setText('sp-addbtn', t('spAddbtn'));
+  setText('sp-spinbtn', t('spSpinbtn')); setText('sp-teamlab', t('spTeamlab'));
+  setText('sp-resetbtn', t('spResetbtn'));
+  document.getElementById('spinBtn').textContent = t('spSpinbtn');
+  setText('ms-title', t('msTitle')); setText('ms-sub', t('msSub'));
+  setText('ms-selteam', t('msSelteam'));
+  setText('sc-title', t('scTitle')); setText('sc-sub', t('scSub'));
+  setText('sc-rank', t('scRank')); setText('sc-team', t('scTeam'));
+  setText('sc-missions', t('scMissions')); setText('sc-points', t('scPoints'));
+  setText('sc-progress', t('scProgress'));
+  setText('ad-title', t('adTitle')); setText('ad-sub', t('adSub'));
+  setText('ad-timer', t('adTimer')); setText('ad-start', t('adStart'));
+  setText('ad-pause', t('adPause')); setText('ad-reset', t('adReset'));
+  setText('ad-setmin', t('adSetmin')); setText('ad-setbtn', t('adSetbtn'));
+  setText('ad-mgr', t('adMgr')); setText('ad-addmission', t('adAddmission'));
+  setText('ad-subs', t('adSubs')); setText('ad-nosub', t('adNosub'));
+}
+
+// ===== WHEEL =====
+let wheelAngle = 0;
+let spinning = false;
+
+function drawWheel() {
+  const canvas = document.getElementById('wheel');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2, cy = canvas.height / 2, r = cx - 4;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const teams = state.teams;
+  const slice = (2 * Math.PI) / teams.length;
+
+  teams.forEach((team, i) => {
+    const start = wheelAngle + i * slice;
+    const end = start + slice;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = team.color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // label
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + slice / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#0a0a14';
+    ctx.font = 'bold 11px Noto Sans JP, sans-serif';
+    const name = team.name.length > 10 ? team.name.slice(0,10) : team.name;
+    ctx.fillText(name, r - 10, 4);
+    ctx.restore();
+  });
+
+  // center circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, 20, 0, 2*Math.PI);
+  ctx.fillStyle = '#0a0a14';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function spinWheel() {
+  if(spinning) return;
+  const name = document.getElementById('nameInput').value.trim();
+  if(!name) { showToast('Please enter your name first!'); return; }
+
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const extraSpins = (Math.floor(Math.random() * 5) + 5) * 2 * Math.PI;
+  const targetAngle = wheelAngle + extraSpins + Math.random() * 2 * Math.PI;
+  const duration = 4000;
+  const startAngle = wheelAngle;
+  const startTime = performance.now();
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 4);
+    wheelAngle = startAngle + (targetAngle - startAngle) * ease;
+    drawWheel();
+    if(progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      wheelAngle = targetAngle % (2 * Math.PI);
+      spinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      onSpinEnd(name);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function onSpinEnd(name) {
+  const teams = state.teams;
+  const slice = (2 * Math.PI) / teams.length;
+  // pointer is at top (3π/2 from 0 in standard), adjusted for rotation
+  const normalizedAngle = ((3 * Math.PI / 2) - wheelAngle % (2 * Math.PI) + 4 * Math.PI) % (2 * Math.PI);
+  const teamIndex = Math.floor(normalizedAngle / slice) % teams.length;
+  const team = teams[teamIndex];
+
+  // Check if team is full (6 max)
+  if(team.members.length >= 6) {
+    // Find a team with space
+    const available = teams.find(t => t.members.length < 6);
+    if(!available) { showToast('All teams are full!'); return; }
+  }
+
+  // Check if player already assigned
+  const already = teams.find(t => t.members.includes(name));
+  if(already) { showToast(`${name} is already in ${already.name}!`); return; }
+
+  const targetTeam = team.members.length < 6 ? team : teams.find(t => t.members.length < 6);
+  targetTeam.members.push(name);
+  state.players.push({name, team: teams.indexOf(targetTeam)});
+  document.getElementById('nameInput').value = '';
+
+  renderTeams();
+  showSpinResult(name, targetTeam);
+  confetti(targetTeam.color);
+  drawWheel();
+}
+
+function showSpinResult(name, team) {
+  const el = document.getElementById('spinResult');
+  el.style.display = 'block';
+  document.getElementById('resultName').textContent = name;
+  document.getElementById('resultName').style.color = team.color;
+  document.getElementById('resultTeam').textContent = `${t('resultMsg')} ${team.name}`;
+  el.style.borderColor = team.color;
+}
+
+function addPlayer() {
+  const input = document.getElementById('nameInput');
+  const name = input.value.trim();
+  if(!name) return;
+  input.value = '';
+  // Just pre-add to list, they still need to spin
+  if(!document.querySelector(`.player-tag[data-name="${name}"]`)) {
+    const tag = document.createElement('div');
+    tag.className = 'player-tag';
+    tag.dataset.name = name;
+    tag.innerHTML = `<span>${name}</span><span class="remove" onclick="removePlayer('${name}')">×</span>`;
+    document.getElementById('playersList').appendChild(tag);
+  }
+  // Auto-spin for them
+  document.getElementById('nameInput').value = name;
+  spinWheel();
+}
+
+function removePlayer(name) {
+  document.querySelector(`.player-tag[data-name="${name}"]`)?.remove();
+  state.teams.forEach(t => {
+    const i = t.members.indexOf(name);
+    if(i > -1) t.members.splice(i,1);
+  });
+  renderTeams();
+}
+
+function resetTeams() {
+  state.teams.forEach(t => t.members = []);
+  state.players = [];
+  document.getElementById('playersList').innerHTML = '';
+  document.getElementById('spinResult').style.display = 'none';
+  renderTeams();
+}
+
+function renderTeams() {
+  const grid = document.getElementById('teamsGrid');
+  grid.innerHTML = '';
+  state.teams.forEach((team, i) => {
+    const card = document.createElement('div');
+    card.className = 'team-card';
+    card.style.borderColor = team.members.length ? team.color + '66' : 'var(--border)';
+    card.innerHTML = `
+      <div class="team-name">
+        <span class="team-dot" style="background:${team.color};"></span>
+        ${team.name}
+        <span style="font-size:11px;color:var(--muted);font-family:inherit;">(${team.members.length}/6)</span>
+      </div>
+      <div class="team-members">
+        ${team.members.length ? team.members.map(m => `<div class="member-chip">👤 ${m}</div>`).join('') : `<div style="color:var(--muted);font-size:12px;">Empty</div>`}
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ===== MISSIONS =====
+function renderMissions() {
+  // Team filter
+  const filter = document.getElementById('teamFilter');
+  filter.innerHTML = state.teams.map((team, i) => `
+    <button class="filter-btn ${state.selectedTeamIndex === i ? 'active' : ''}"
+      style="${state.selectedTeamIndex === i ? `background:${team.color};border-color:${team.color};` : ''}"
+      onclick="selectTeam(${i})">${team.name}</button>
+  `).join('');
+
+  const list = document.getElementById('missionsList');
+  list.innerHTML = '';
+  const ti = state.selectedTeamIndex;
+  state.missions.forEach(mission => {
+    const done = mission.done[ti];
+    const photos = mission.photos[ti] || [];
+    const card = document.createElement('div');
+    card.className = `mission-card ${done ? 'done' : ''}`;
+    card.innerHTML = `
+      <div class="mission-check ${done ? 'checked' : ''}" onclick="toggleMission(${mission.id})"></div>
+      <div class="mission-body">
+        <div class="mission-title">${mission.text[state.lang] || mission.text['en']}</div>
+        <div class="mission-pts">⭐ ${mission.pts} ${t('pts')}</div>
+        <div class="mission-actions">
+          <button class="upload-btn" onclick="uploadPhoto(${mission.id})">${t('uploadPhoto')}</button>
+        </div>
+        <div class="photo-preview" id="photos-${mission.id}">
+          ${photos.map(p => `<img src="${p}" class="photo-thumb" onclick="openModal('${p}')">`).join('')}
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function selectTeam(i) {
+  state.selectedTeamIndex = i;
+  renderMissions();
+}
+
+function toggleMission(id) {
+  const m = state.missions.find(m => m.id === id);
+  if(m) m.done[state.selectedTeamIndex] = !m.done[state.selectedTeamIndex];
+  renderMissions();
+  renderScoreboard();
+}
+
+function uploadPhoto(id) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const m = state.missions.find(m => m.id === id);
+      if(m) m.photos[state.selectedTeamIndex].push(ev.target.result);
+      renderMissions();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ===== SCOREBOARD =====
+function renderScoreboard() {
+  const podium = document.getElementById('scorePodium');
+  const tbody = document.getElementById('scoresBody');
+  podium.innerHTML = '';
+  tbody.innerHTML = '';
+
+  const scores = state.teams.map((team, i) => {
+    const completed = state.missions.filter(m => m.done[i]).length;
+    const points = state.missions.reduce((sum, m) => sum + (m.done[i] ? m.pts : 0), 0);
+    return {team, i, completed, points};
+  }).sort((a,b) => b.points - a.points);
+
+  // Podium (top 3)
+  const podiumColors = ['#ffd700', '#c0c0c0', '#cd7f32']; // gold, silver, bronze
+  scores.slice(0, 3).forEach((s, idx) => {
+    const heights = [120, 100, 80];
+    const item = document.createElement('div');
+    item.className = 'podium-item';
+    item.innerHTML = `
+      <div class="podium-block" style="height:${heights[idx]}px;background:${podiumColors[idx]};">
+        <div>${idx + 1}</div>
+      </div>
+      <div class="podium-name">${s.team.name}</div>
+      <div class="podium-score">${s.points}</div>
+    `;
+    podium.appendChild(item);
+  });
+
+  // Table
+  scores.forEach((s, idx) => {
+    const badge = document.createElement('span');
+    badge.className = 'rank-badge';
+    badge.style.background = [podiumColors[0], podiumColors[1], podiumColors[2], 'var(--border)'][idx];
+    badge.style.color = '#0a0a14';
+    badge.textContent = idx + 1;
+
+    const pct = Math.min((s.points / (state.missions.reduce((sum,m) => sum + m.pts, 0) || 1)) * 100, 100);
+    const bar = document.createElement('div');
+    bar.innerHTML = `
+      <tr>
+        <td>${badge.outerHTML}</td>
+        <td><strong>${s.team.name}</strong></td>
+        <td>${s.completed}/${state.missions.length}</td>
+        <td><strong>${s.points}</strong></td>
+        <td>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" style="width:${pct}%;background:${s.team.color};"></div>
+          </div>
+        </td>
+      </tr>
+    `;
+    tbody.innerHTML += bar.innerHTML;
+  });
+}
+
+// ===== ADMIN =====
+function renderAdmin() {
+  const list = document.getElementById('adminMissionList');
+  list.innerHTML = state.missions.map(m => `
+    <div class="admin-mission-item">
+      <span>${m.text[state.lang] || m.text['en']}</span>
+      <input class="pts-edit" type="number" value="${m.pts}" onchange="updateMissionPts(${m.id}, this.value)"/>
+    </div>
+  `).join('');
+
+  renderSubmissions();
+}
+
+function updateMissionPts(id, pts) {
+  const m = state.missions.find(m => m.id === id);
+  if(m) m.pts = parseInt(pts) || 0;
+  renderScoreboard();
+}
+
+function addMission() {
+  const text = document.getElementById('newMissionText').value.trim();
+  const pts = parseInt(document.getElementById('newMissionPts').value) || 10;
+  if(!text) return;
+  const newId = Math.max(...state.missions.map(m => m.id)) + 1;
+  state.missions.push({
+    id: newId,
+    text: {en: text, ja: text, zh: text, ko: text, vi: text},
+    pts,
+    done: [false, false, false, false, false, false],
+    photos: [[], [], [], [], [], []]
+  });
+  document.getElementById('newMissionText').value = '';
+  document.getElementById('newMissionPts').value = '10';
+  renderAdmin();
+  renderMissions();
+  showToast('Mission added!');
+}
+
+function renderSubmissions() {
+  const list = document.getElementById('submissionList');
+  const subs = [];
+  state.teams.forEach((team, ti) => {
+    state.missions.forEach(mission => {
+      if(mission.done[ti] && mission.photos[ti]?.length > 0) {
+        subs.push({team: team.name, mission: mission.text[state.lang] || mission.text['en'], photos: mission.photos[ti]});
+      }
+    });
+  });
+
+  if(!subs.length) {
+    list.innerHTML = `<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;" id="ad-nosub">${t('adNosub')}</div>`;
+  } else {
+    list.innerHTML = subs.map(s => `
+      <div class="submission-item">
+        <strong>${s.team}</strong> - ${s.mission}
+        <div class="sub-photos">
+          ${s.photos.map(p => `<img src="${p}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;cursor:pointer;" onclick="openModal('${p}')">`).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// ===== TIMER =====
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function updateTimerDisplay() {
+  document.getElementById('timerDisplay').textContent = formatTime(state.timer.seconds);
+}
+
+function startTimer() {
+  if(state.timer.running) return;
+  state.timer.running = true;
+  state.timer.interval = setInterval(() => {
+    if(state.timer.seconds > 0) {
+      state.timer.seconds--;
+      updateTimerDisplay();
+    } else {
+      pauseTimer();
+      showToast('⏰ Time\'s up!');
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  state.timer.running = false;
+  clearInterval(state.timer.interval);
+}
+
+function resetTimer() {
+  pauseTimer();
+  state.timer.seconds = 20 * 60;
+  updateTimerDisplay();
+}
+
+function setTimerDuration() {
+  const val = parseInt(document.getElementById('timerInput').value);
+  if(val > 0) {
+    state.timer.seconds = val * 60;
+    updateTimerDisplay();
+  }
+}
+
+// ===== MODAL =====
+function openModal(content) {
+  const overlay = document.getElementById('modal-overlay');
+  const modalContent = document.getElementById('modal-content');
+  if(content.includes('data:image') || content.endsWith('.jpg') || content.endsWith('.png') || content.endsWith('.gif')) {
+    modalContent.innerHTML = `<img src="${content}" style="width:100%;border-radius:12px;"/>`;
+  } else {
+    modalContent.innerHTML = `<h2>Info</h2><p>${content}</p>`;
+  }
+  overlay.classList.remove('hidden');
+}
+
+function closeModal(event) {
+  if(event && event.target.id !== 'modal-overlay') return;
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+// ===== UTILS =====
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+  document.getElementById(`nav-${page}`).classList.add('active-nav');
+  if(page === 'admin') renderAdmin();
+  if(page === 'missions') renderMissions();
+  if(page === 'score') renderScoreboard();
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function confetti(color) {
+  for(let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.background = color;
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.top = '-20px';
+    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.2) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 5000);
+  }
+}
+
+// ===== RENDER ALL =====
+function renderAll() {
+  renderTeams();
+  renderMissions();
+  renderScoreboard();
+  drawWheel();
+  updateTimerDisplay();
+}
+
+// INIT
+window.addEventListener('load', () => {
+  renderAll();
+  showPage('home');
+});
+</script>
+
+</body>
+</html>
